@@ -1,0 +1,2 @@
+com.oracle.xing.spi.PayMessageHandle
+com.oracle.xing.spi.RollBackMessageHandle
