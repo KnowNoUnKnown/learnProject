@@ -5,6 +5,7 @@ import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -83,5 +84,16 @@ public class FstUtil {
     public static <T> T[] copyObject(T[] arrs){
         if(null == arrs)return null;
         return unserializer(serializer(arrs));
+    }
+
+    /**
+     * 对象set集合复制
+     * @param set
+     * @param <T>
+     * @return
+     */
+    public static <T> Set<T> copyObject(Set<T> set){
+        if(null == set)return null;
+        return unserializer(serializer(set));
     }
 }

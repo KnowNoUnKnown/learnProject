@@ -20,9 +20,11 @@ public class Phone implements Serializable {
     private ConcurrentHashMap concurrentHashMap ;
 
     public Phone() {
+        System.out.println("无参构造方法!");
     }
 
     public Phone(String name, String color, BigDecimal price) {
+        System.out.println("三参构造方法!");
         this.name = name;
         this.color = color;
         this.price = price;
