@@ -32,10 +32,20 @@ public class ApplicaionInitialized implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
+        /**
+         * 通过spi 加载类,
+         * 然后将spi 类交给spring管理
+         */
         ServiceLoader<MessageHandle> serviceLoader = ServiceLoader.load(MessageHandle.class);
         Iterator<MessageHandle> iterator = serviceLoader.iterator();
         while (iterator.hasNext()){
             MessageHandle m = iterator.next();
+            if(m instanceof PayMessageHandle){
+                payMessageHandle = (PayMessageHandle)m;
+            }
+            if(m instanceof RollBackMessageHandle){
+                rollBackMessageHandle = (RollBackMessageHandle)m;
+            }
             m.execute();
             System.out.println(JSON.toJSONString(m));
             System.out.println(m.getClass().getClassLoader()+"\n\n\n");
@@ -48,7 +58,13 @@ public class ApplicaionInitialized implements ApplicationRunner {
         System.out.println(JSON.toJSONString(payMessageHandle));
         System.out.println("autowired  -----payMessageHandle    "+payMessageHandle.getClass().getClassLoader());
 
+        /**
+         * 获取接口下所有实现类
+         */
         Map<String , MessageHandle> map = webApplicationContext.getBeansOfType(MessageHandle.class);
-        System.out.println(JSON.toJSONString(map));
+        for(Map.Entry entry : map.entrySet()){
+            System.out.println(entry.getKey());
+            System.out.println(entry.getValue());
+        }
     }
 }
