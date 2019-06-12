@@ -1,65 +1,55 @@
 package com.oracle.xing.load.compile;
 
-import javax.tools.*;
-import java.io.ByteArrayOutputStream;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 public class JCompiler {
 
     /**
      * 编译 .java 内容为 .class内容
-     *
-     * @param javaName
-     * @param javaSrc
+     * @param file 待编译的.java文件
+     * @param outPutPath .class文件输出位置
      * @return
-     * @throws Exception
      */
-    public static Map<String, byte[]> compiler(String javaName, String javaSrc, String content) {
+    @Deprecated
+    public static String compiler(File file,String outPutPath) {
+        outPutPath = null == outPutPath ?
+                JCompiler.class.getResource("/").getPath():outPutPath;
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-        StandardJavaFileManager stdManager = compiler.getStandardFileManager(diagnostics, null, null);
-        try (MemoryJavaFileManager manager = new MemoryJavaFileManager(stdManager)) {
-            JavaFileObject javaFileObject = MemoryJavaFileManager.makeStringSource(javaName, javaSrc);
-            JavaCompiler.CompilationTask task = compiler.getTask(null, manager, null, null, null, Arrays.asList(javaFileObject));
-            if (task.call()) {
-                return manager.getClassBytes();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        StandardJavaFileManager stdManager = compiler.getStandardFileManager(null, null, null);
+        Iterable it = stdManager.getJavaFileObjects(file);
+        JavaCompiler.CompilationTask task = compiler.getTask(null, stdManager, null, Arrays.asList("-d",outPutPath),
+                null, it);
+        if(task.call()){
+            return "";
         }
         return null;
     }
 
+    /**
+     * 内存中编译，热加载执行
+     * @param javaName
+     * @param javaSrc
+     * @return
+     */
     public static Map<String, byte[]> compiler(String javaName, String javaSrc) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        JavaFileObject file = new JavaSource(javaName, javaSrc);
-
-        Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(file);
-        JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
-
-        boolean result = task.call();
-        for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
-            System.out.println(diagnostic.getCode());
-            System.out.println(diagnostic.getKind());
-            System.out.println(diagnostic.getPosition());
-            System.out.println(diagnostic.getStartPosition());
-            System.out.println(diagnostic.getEndPosition());
-            System.out.println(diagnostic.getSource());
-            System.out.println(diagnostic.getMessage(null));
-        }
-        if (result) {
-            try {
-                ByteArrayOutputStream outputStream = (ByteArrayOutputStream) file.openOutputStream();
-                Map<String, byte[]> resultMap = new HashMap<>();
-                resultMap.put(javaName, outputStream.toByteArray());
-                return resultMap;
-            } catch (Exception e) {
-                e.printStackTrace();
+        StandardJavaFileManager stdManager = compiler.getStandardFileManager(null, null, null);
+        try (MemoryJavaFileManager manager = new MemoryJavaFileManager(stdManager)) {
+            JavaFileObject javaFileObject = MemoryJavaFileManager.makeStringSource(javaName, javaSrc);
+            JavaCompiler.CompilationTask task = compiler.getTask(null, manager, null, null, null, Arrays.asList(javaFileObject));
+            if (task.call()){
+                return manager.getClassBytes();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return new HashMap<>();
+        return null;
     }
 }

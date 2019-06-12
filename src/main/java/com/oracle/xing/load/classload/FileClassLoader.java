@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FileClassLoader extends ClassLoader {
 
+    /**
+     * 保存所有热加载的类
+     */
     private static ConcurrentHashMap<String ,Class<?>> clazzMap = new ConcurrentHashMap<>();
 
     public FileClassLoader() {
@@ -64,7 +67,7 @@ public class FileClassLoader extends ClassLoader {
      * @param className
      * @return
      */
-    public Class<?> getClass(String className){
+    public static Class<?> getClass(String className){
         return clazzMap.get(className);
     }
 }

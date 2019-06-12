@@ -1,12 +1,12 @@
 package com.oracle.xing.load.listen;
 
+import com.oracle.xing.load.basedo.Live;
 import com.oracle.xing.load.classload.FileClassLoader;
 import com.oracle.xing.load.compile.JCompiler;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class FileListener {
 
-    private FileClassLoader fileClassLoader = new FileClassLoader();
+    private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     public void listen(String filePath)throws Exception{
         FileFilter filter= FileFilterUtils.and(FileFilterUtils.trueFileFilter());
@@ -38,24 +38,11 @@ public class FileListener {
             }
 
             @Override
-            public void onFileChange(File file)
-            {
+            public void onFileChange(File file) {
                 // TODO Auto-generated method stub
                 System.out.println("onFileChange-------------->"+file.getName());
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 try {
-                    Files.copy(file.toPath(),outputStream);
-                    /**
-                     * 编译.java文件
-                     */
-
-                    Map<String, byte[]> map = JCompiler.compiler(file.getName().split("\\.")[0], outputStream.toString());
-                    for(String key : map.keySet()){
-                        /**
-                         * 加载.class文件
-                         */
-                        fileClassLoader.loadClass(key,map.get(key));
-                    }
+                    run(compile(file));
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -73,7 +60,7 @@ public class FileListener {
             public void onFileDelete(File file)
             {
                 // TODO Auto-generated method stub
-                System.out.println("onFileDelete");
+                System.out.println("onFileDelete----------->"+file.getAbsolutePath());
                 super.onFileDelete(file);
             }
 
@@ -81,12 +68,43 @@ public class FileListener {
             public void onStart(FileAlterationObserver observer)
             {
                 // TODO Auto-generated method stub
-//                System.out.println("onStart");
                 super.onStart(observer);
             }
         });
         FileAlterationMonitor monitor = new FileAlterationMonitor(1000);
         monitor.addObserver(filealtertionObserver);
         monitor.start();
+    }
+
+    /**
+     * 编译.java文件
+     * @param file 待编译.java文件
+     * @return 类名称
+     * @throws Exception
+     */
+    private String compile(File file) throws Exception {
+        Files.copy(file.toPath(), byteArrayOutputStream);
+        Map<String, byte[]> resultMap = JCompiler.compiler(file.getName(), byteArrayOutputStream.toString());
+        byteArrayOutputStream.reset();
+        FileClassLoader fileClassLoader = new FileClassLoader();
+        String className = null;
+        for (String key : resultMap.keySet()) {
+            fileClassLoader.loadClass(key, resultMap.get(key));
+            if(!key.contains("$")){
+                className = key;
+            }
+        }
+        return className;
+    }
+
+    /**
+     * 及时执行修改后的文件
+     * @param className
+     * @throws Exception
+     */
+    private void run(String className)throws Exception{
+        Class clazz = FileClassLoader.getClass(className);
+        Live live = (Live)clazz.newInstance();
+        live.run();
     }
 }
