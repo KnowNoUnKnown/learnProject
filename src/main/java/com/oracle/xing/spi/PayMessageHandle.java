@@ -1,6 +1,5 @@
 package com.oracle.xing.spi;
 
-import com.oracle.xing.selfwired.Oracle;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,7 +15,6 @@ public class PayMessageHandle implements MessageHandle {
     }
 
     @Override
-    @Oracle(values = {Oracle.ADMIN,Oracle.NORMAL,Oracle.SUPER_ADMIN})
     public String getTopic() {
         return "PAY_MONEY";
     }

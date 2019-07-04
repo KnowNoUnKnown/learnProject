@@ -1,11 +1,12 @@
 package com.oracle.xing.model;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  * Created by Administrator on 2018/10/15.
  */
-public class User {
+public class User implements Serializable {
 
     private String id;
 
@@ -50,4 +51,13 @@ public class User {
     }
 
     public User(){}
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", userName='" + userName + '\'' +
+                ", gender=" + gender +
+                '}';
+    }
 }

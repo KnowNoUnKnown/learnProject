@@ -7,20 +7,22 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
+import java.nio.charset.Charset;
 
 /**
  * Created by liuyong
  * 2018-11-07  14-48
  */
 
-public class HttpNetty {
+public class HttpServer {
 
     private Integer port;
 
-    public HttpNetty(Integer port) {
+    public HttpServer(Integer port) {
         this.port = port;
     }
 
@@ -32,8 +34,8 @@ public class HttpNetty {
         this.port = port;
     }
 
-    public static void main(String []args)throws Exception{
-        new HttpNetty(10000).start();
+    public static void main(String []args){
+        new HttpServer(10000).start();
     }
 
     public void start(){
@@ -43,18 +45,8 @@ public class HttpNetty {
         try {
         serverBootstrap.group(boosGroup,workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline()
-                                .addLast(new DiscardServerHandler());
-                        /**
-                         *   ch.pipeline()
-                         *   .addLast("handler",new HttpHandler());
-                         *
-                         */
-                    }
-                }).option(ChannelOption.SO_BACKLOG, 128) // determining the number of connections queued
+                .childHandler(new ChildHandler())
+                .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, Boolean.TRUE);
                 ChannelFuture future = serverBootstrap.bind(port).sync();
                 future.channel().closeFuture().sync();
@@ -63,6 +55,19 @@ public class HttpNetty {
         }finally {
             boosGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+        }
+    }
+
+    /**
+     *
+     */
+    class ChildHandler extends ChannelInitializer<SocketChannel>{
+        @Override
+        protected void initChannel(SocketChannel socketChannel) throws Exception {
+            socketChannel.pipeline().addLast(
+                    new HttpServerCodec(),
+                    new HttpObjectAggregator(1024*1024),
+                    new ChannelInboundHandler());
         }
     }
 }
