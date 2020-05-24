@@ -1,14 +1,11 @@
 package com.oracle.xing.model;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * Created by Administrator on 2018/10/15.
  */
-public class User implements Serializable {
-
-    private String id;
+public class User extends BaseModel implements Serializable {
 
     private String userName;
 
@@ -30,24 +27,9 @@ public class User implements Serializable {
         this.gender = gender;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public User(String id, String userName, char gender) {
-        this.id = id;
-        this.userName = userName;
-        this.gender = gender;
-    }
-
     public User(String userName, char gender) {
         this.userName = userName;
         this.gender = gender;
-        this.id = UUID.randomUUID().toString().replaceAll("-","");
     }
 
     public User(){}
@@ -55,9 +37,8 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-                "id='" + id + '\'' +
-                ", userName='" + userName + '\'' +
+                "userName='" + userName + '\'' +
                 ", gender=" + gender +
-                '}';
+                "} " + super.toString();
     }
 }

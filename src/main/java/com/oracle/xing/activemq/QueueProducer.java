@@ -27,7 +27,7 @@ public class QueueProducer {
         TextMessage message = session.createTextMessage("为什么会需要消息队列(MQ)？");
         producer.send(message);
         ActiveMQObjectMessage objectMessage = new ActiveMQObjectMessage();
-        objectMessage.setObject(new User("123","oracle",'a'));
+        objectMessage.setObject(new User("oracle",'a'));
         producer.send(objectMessage);
         producer.close();
         session.close();

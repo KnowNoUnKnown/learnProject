@@ -15,9 +15,9 @@ import com.oracle.xing.Application;
 public class Generate {
 
     public static void main(String...args){
-        CodeGenerate codeGenerate = CodeGenerate.getInstance("192.168.1.101",
-                "oracle","oracle","oracle",new DataTypeConvert());
-        codeGenerate.generate(Lists.newArrayList("user","websites"),
-                "E:\\LearnProject\\Java\\learnProject\\src\\main\\java\\com\\oracle\\xing", Application.class);
+//        CodeGenerate codeGenerate = CodeGenerate.getInstance("192.168.1.101",
+//                "oracle","oracle","oracle",new DataTypeConvert());
+//        codeGenerate.generate(Lists.newArrayList("user","websites"),
+//                "E:\\LearnProject\\Java\\learnProject\\src\\main\\java\\com\\oracle\\xing", Application.class);
     }
 }

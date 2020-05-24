@@ -3,6 +3,7 @@ package com.oracle.xing.streamapi;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.*;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,6 +59,9 @@ public class StreamApi {
     }
 
     public static void mapStream(){
+
+//        ThreadPoolExecutor executor = new ThreadPoolExecutor();
+//        executor.execute();
         HashMap<String ,Integer> map = new HashMap<>();
         map.put("hello",3);
         map.put("world",85);
